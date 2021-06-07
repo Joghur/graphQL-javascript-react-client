@@ -162,6 +162,7 @@ const UPDATE_USER = gql`
     $address: String!
     $email: String!
     $phone: String!
+    $roles: [Int!]!
   ) {
     updateUser(
       id: $id
@@ -172,6 +173,7 @@ const UPDATE_USER = gql`
       address: $address
       email: $email
       phone: $phone
+      roles: $roles
     ) {
       user {
         id
@@ -199,6 +201,7 @@ const CREATE_USER = gql`
       address: $address
       email: $email
       phone: $phone
+      roles: $roles
     ) {
       user {
         id
@@ -299,12 +302,6 @@ export const User = () => {
       value = dateStringToEpoch(secondParam);
     }
 
-    // active member switch
-    // if (name === 'active') {
-    //   id = name;
-    //   value = checked;
-    // }
-
     const validated = validate(id, value);
 
     // if something is not validated set error states
@@ -329,11 +326,13 @@ export const User = () => {
     });
   };
 
+  console.log('user, user.roles', user, user?.roles);
+
   return (
     <div>
       <div>
         <BackButton />
-        {didChange && (isAdmin || isSuperAdmin) && (
+        {didChange && (
           <Tooltip title="Gem rettelser">
             <Button
               variant="contained"
@@ -381,7 +380,7 @@ export const User = () => {
             </Button>
           </Tooltip>
         )}
-        {id !== '-1' && (isAdmin || isSuperAdmin) && (
+        {id !== '-1' && (
           <>
             <Tooltip title="Tryk kun på denne knap hvis du vil slette en bruger der er oprettet ved en fejl eller under test. Du får een mulighed mere for at fortryde hvis du trykker">
               <Button
@@ -413,9 +412,7 @@ export const User = () => {
               </DialogTitle>
               <DialogContent>
                 <DialogContentText id="alert-dialog-slide-description">
-                  Du er ved at slette et Medlem. Dette skal kun gøres hvis der
-                  er oprettet en bruger ved en fejl. Tidligere Medlemmer skal
-                  gøres inaktive ved at benytte "Nuværende Medlem" kontakten!
+                  Du er ved at slette et Medlem!!
                 </DialogContentText>
               </DialogContent>
               <DialogActions>
@@ -444,20 +441,30 @@ export const User = () => {
       {user && (
         <div className={classes.root}>
           <div>
+            <h1>Her kan et medlems data ændres</h1>
             <div>
-              <Tooltip title="Gør et eks Medlem inaktiv ved at benytte denne kontakt">
-                <FormControlLabel
-                  control={
-                    <IOSSwitch
-                      checked={user.active}
-                      onChange={handleChange}
-                      name="active"
-                    />
-                  }
-                  label="Nuværende Medlem"
-                />
-              </Tooltip>
+              <ul>
+                <li>
+                  Database <b>Many-to-Many relation</b> mellem de to tabeller -
+                  bruger og roller.
+                  <ul>
+                    <li>
+                      En bruger kan have flere roller, og en rolle kan have
+                      flere brugere
+                    </li>
+                  </ul>
+                </li>
+                <li>
+                  Hold mus over <b>Roller</b>-feltet for mere info
+                </li>
+                <li>
+                  Når der er ændret noget, tryk på OPDATÈR knappen for at gemme
+                  ny data{' '}
+                </li>
+                <li>Tryk på FJERN knappen for at slette et medlem</li>
+              </ul>
             </div>
+            <br />
             <TextField
               id="name"
               label="Navn"
@@ -513,34 +520,15 @@ export const User = () => {
               variant="outlined"
               helperText={errorMessage.phone && errorMessage.phone}
             />
-            <MuiPickersUtilsProvider utils={DateFnsUtils}>
-              <KeyboardDatePicker
-                id="birthday"
-                label="Fødseldag"
-                format="d/M-y"
-                margin="dense"
-                variant="inline"
-                inputVariant="outlined"
-                className={classes.textField}
-                value={dateEpochToDateString(user.birthday)}
-                initialFocusedDate="1970-1-1"
-                onChange={handleChange}
-                animateYearScrolling
-                KeyboardButtonProps={{
-                  'aria-label': 'change date',
-                }}
-              />
-            </MuiPickersUtilsProvider>
             <FormControl
               name="size"
               variant="outlined"
               className={classes.textField}
               style={{ marginTop: 8 }}
               margin="dense"
-            >
-            </FormControl>
+            ></FormControl>
             {rolesQuery?.data?.allRoles?.roles && (
-              <Tooltip title="Tryk på tekst for at vælge ny titel. Slet gammel ved at trykke på kryds">
+              <Tooltip title="Tryk på tekst for at vælge ny rolle. Slet gammel ved at trykke på kryds">
                 <Autocomplete
                   multiple
                   id="roles"
@@ -558,7 +546,7 @@ export const User = () => {
                       <TextField
                         {...params}
                         variant="outlined"
-                        label="Titler"
+                        label="Roller"
                         placeholder="Vælg ny titel"
                       />
                     );

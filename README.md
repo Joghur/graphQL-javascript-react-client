@@ -6,7 +6,7 @@ This is a client showing many-to-many relations between two database tables prov
 ### Some files needed (not provided in repo):
 
 **./src/constants.js**
-    export const GRAPHQL_SERVER_URL = 'localhost:4002/genericgraphql';
+    export const GRAPHQL_SERVER_URL = 'http://localhost:4002/genericgraphql';
 
 ---
 ### Start

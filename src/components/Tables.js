@@ -20,8 +20,6 @@ import Tooltip from '@material-ui/core/Tooltip';
 import FilterListIcon from '@material-ui/icons/FilterList';
 import AddBoxIcon from '@material-ui/icons/AddBox';
 import _ from 'lodash';
-import styled from 'styled-components';
-import gql from 'graphql-tag';
 import Snackbar from '../components/Snackbar';
 import { useHistory } from 'react-router-dom';
 
@@ -66,7 +64,7 @@ function EnhancedTableHead(props) {
   const createSortHandler = property => event => {
     onRequestSort(event, property);
   };
-  // console.log('pdfOnlyMode 145', pdfOnlyMode);
+
   return (
     <TableHead>
       <TableRow>
@@ -316,128 +314,128 @@ export default function Tables(props) {
 
   return (
     <div className={classes.root}>
-        <div>
-          <Paper className={classes.paper}>
-            <EnhancedTableToolbar
-              title={title}
-              numSelected={selected.length}
-              handlePdfTag={handlePdfTag}
-            />
-            <TableContainer>
-              <Table
-                stickyHeader
-                className={classes.table}
-                aria-labelledby="tableTitle"
-                size={'small'}
-                aria-label="sticky table"
-              >
-                <EnhancedTableHead
-                  classes={classes}
-                  numSelected={selected.length}
-                  order={order}
-                  orderBy={orderBy}
-                  onSelectAllClick={handleSelectAllClick}
-                  onRequestSort={handleRequestSort}
-                  rowCount={tabelArray.length}
-                  headCells={headCells}
-                  startRowsPerPage={startRowsPerPage}
-                />
-                <TableBody>
-                  {stableSort(tabelArray, getComparator(order, orderBy))
-                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                    .map((row, index) => {
-                      const isItemSelected = isSelected(row.name);
-                      const labelId = `enhanced-table-checkbox-${index}`;
+      <div>
+        <Paper className={classes.paper}>
+          <EnhancedTableToolbar
+            title={title}
+            numSelected={selected.length}
+            handlePdfTag={handlePdfTag}
+          />
+          <TableContainer>
+            <Table
+              stickyHeader
+              className={classes.table}
+              aria-labelledby="tableTitle"
+              size={'small'}
+              aria-label="sticky table"
+            >
+              <EnhancedTableHead
+                classes={classes}
+                numSelected={selected.length}
+                order={order}
+                orderBy={orderBy}
+                onSelectAllClick={handleSelectAllClick}
+                onRequestSort={handleRequestSort}
+                rowCount={tabelArray.length}
+                headCells={headCells}
+                startRowsPerPage={startRowsPerPage}
+              />
+              <TableBody>
+                {stableSort(tabelArray, getComparator(order, orderBy))
+                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map((row, index) => {
+                    const isItemSelected = isSelected(row.name);
+                    const labelId = `enhanced-table-checkbox-${index}`;
 
-                      // only using values chosen by parent component
-                      let filteredRow = {};
-                      for (const key in row) {
-                        if (Object.hasOwnProperty.call(row, key)) {
-                          if (headerKeysInTabel.includes(key)) {
-                            filteredRow[key] = row[key];
-                          }
+                    // only using values chosen by parent component
+                    let filteredRow = {};
+                    for (const key in row) {
+                      if (Object.hasOwnProperty.call(row, key)) {
+                        if (headerKeysInTabel.includes(key)) {
+                          filteredRow[key] = row[key];
                         }
                       }
+                    }
 
-                      return (
-                        <Tooltip title="Tryk på et navn for at se detaljer">
-                          <TableRow
-                            hover
-                            role="checkbox"
-                            aria-checked={isItemSelected}
-                            tabIndex={-1}
-                            key={filteredRow[orderBy]}
-                            selected={isItemSelected}
-                          >
-                            {!pdfOnlyMode && (
-                              <TableCell padding="checkbox">
-                                <Checkbox
-                                  checked={isItemSelected}
-                                  inputProps={{ 'aria-labelledby': labelId }}
-                                  onClick={event =>
-                                    handleClickSelectBox(
-                                      event,
-                                      filteredRow[orderBy],
-                                      row['id'],
-                                    )
-                                  }
-                                />
-                              </TableCell>
-                            )}
-                            <TableCell
-                              component="th"
-                              id={labelId}
-                              scope="row"
-                              padding="none"
-                              className={classes.tablecell}
-                              onClick={() => history.push('/user/' + row['id'])}
-                            >
-                              {filteredRow[headerKeysInTabel[0]]}
+                    return (
+                      <Tooltip title="Tryk på et navn for at se detaljer">
+                        <TableRow
+                          hover
+                          role="checkbox"
+                          aria-checked={isItemSelected}
+                          tabIndex={-1}
+                          key={filteredRow[orderBy]}
+                          selected={isItemSelected}
+                        >
+                          {!pdfOnlyMode && (
+                            <TableCell padding="checkbox">
+                              <Checkbox
+                                checked={isItemSelected}
+                                inputProps={{ 'aria-labelledby': labelId }}
+                                onClick={event =>
+                                  handleClickSelectBox(
+                                    event,
+                                    filteredRow[orderBy],
+                                    row['id'],
+                                  )
+                                }
+                              />
                             </TableCell>
-                            {headerKeysInTabel.map(
-                              (key, index) =>
-                                index > 0 && (
-                                  <>
-                                    <TableCell
-                                      align="left"
-                                      className={classes.tablecell}
-                                      onClick={() =>
-                                        history.push('/user/' + row['id'])
-                                      }
-                                    >
-                                      {filteredRow[key]}
-                                    </TableCell>
-                                  </>
-                                ),
-                            )}
-                          </TableRow>
-                        </Tooltip>
-                      );
-                    })}
-                  {emptyRows > 0 && (
-                    <TableRow style={{ height: 25 * emptyRows }}>
-                      <TableCell colSpan={2} />
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </TableContainer>
-            {showPagination && (
-              <TablePagination
-                rowsPerPageOptions={rowsPerPageOptions}
-                component="div"
-                count={tabelArray.length}
-                rowsPerPage={rowsPerPage}
-                page={page}
-                onChangePage={handleChangePage}
-                onChangeRowsPerPage={handleChangeRowsPerPage}
-                labelRowsPerPage="Rækker per side:"
-                nextIconButtonText="Næste side"
-                backIconButtonText="Forrige side"
-              />
-            )}
-          </Paper>
-        </div>
+                          )}
+                          <TableCell
+                            component="th"
+                            id={labelId}
+                            scope="row"
+                            padding="none"
+                            className={classes.tablecell}
+                            onClick={() => history.push('/user/' + row['id'])}
+                          >
+                            {filteredRow[headerKeysInTabel[0]]}
+                          </TableCell>
+                          {headerKeysInTabel.map(
+                            (key, index) =>
+                              index > 0 && (
+                                <>
+                                  <TableCell
+                                    align="left"
+                                    className={classes.tablecell}
+                                    onClick={() =>
+                                      history.push('/user/' + row['id'])
+                                    }
+                                  >
+                                    {filteredRow[key]}
+                                  </TableCell>
+                                </>
+                              ),
+                          )}
+                        </TableRow>
+                      </Tooltip>
+                    );
+                  })}
+                {emptyRows > 0 && (
+                  <TableRow style={{ height: 25 * emptyRows }}>
+                    <TableCell colSpan={2} />
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+          {showPagination && (
+            <TablePagination
+              rowsPerPageOptions={rowsPerPageOptions}
+              component="div"
+              count={tabelArray.length}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onChangePage={handleChangePage}
+              onChangeRowsPerPage={handleChangeRowsPerPage}
+              labelRowsPerPage="Rækker per side:"
+              nextIconButtonText="Næste side"
+              backIconButtonText="Forrige side"
+            />
+          )}
+        </Paper>
+      </div>
     </div>
   );
 }

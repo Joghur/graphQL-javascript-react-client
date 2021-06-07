@@ -97,24 +97,8 @@ export function Routing({ buildDate }) {
           </ListItem>
         ))}
       </List>
-      <Divider />
-      <ListSubheader>Bruger</ListSubheader>
-        <List>
-          <ListItem button key={'logout'} component={NavLink} to="/logout">
-            <ListItemIcon>
-              {' '}
-              <GavelIcon />
-            </ListItemIcon>
-            <ListItemText primary="Log ud" />
-          </ListItem>
-        </List>
     </div>
   );
-
-
-  // if (initializing) {
-  //   return <Snackbar severity="info">Henter....</Snackbar>;
-  // }
 
   return (
     <div className={classes.root}>
