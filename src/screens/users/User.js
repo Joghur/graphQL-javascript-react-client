@@ -29,8 +29,6 @@ import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import DateFnsUtils from '@date-io/date-fns';
 import { KeyboardDatePicker } from '@material-ui/pickers';
 import validate from '../../utils/validate';
-import { userState } from '../../Recoil';
-import { useRecoilState } from 'recoil';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -134,13 +132,6 @@ const USER = gql`
         birthday
         email
         phone
-        mobile
-        work
-        workemail
-        workphone
-        size
-        firebaseemail
-        firebaseuid
         roles {
           id
           role
@@ -171,14 +162,6 @@ const UPDATE_USER = gql`
     $address: String!
     $email: String!
     $phone: String!
-    $mobile: String!
-    $work: String!
-    $workemail: String!
-    $workphone: String!
-    $size: String!
-    $roles: [Int!]!
-    $firebaseemail: String!
-    $firebaseuid: String!
   ) {
     updateUser(
       id: $id
@@ -189,14 +172,6 @@ const UPDATE_USER = gql`
       address: $address
       email: $email
       phone: $phone
-      mobile: $mobile
-      work: $work
-      workemail: $workemail
-      workphone: $workphone
-      size: $size
-      roles: $roles
-      firebaseuid: $firebaseuid
-      firebaseemail: $firebaseemail
     ) {
       user {
         id
@@ -214,13 +189,7 @@ const CREATE_USER = gql`
     $address: String!
     $email: String!
     $phone: String!
-    $mobile: String!
-    $work: String!
-    $workemail: String!
-    $workphone: String!
-    $size: String!
     $roles: [Int!]!
-    $password: String!
   ) {
     createUser(
       active: $active
@@ -230,13 +199,6 @@ const CREATE_USER = gql`
       address: $address
       email: $email
       phone: $phone
-      mobile: $mobile
-      work: $work
-      workemail: $workemail
-      workphone: $workphone
-      size: $size
-      roles: $roles
-      password: $password
     ) {
       user {
         id
@@ -259,9 +221,6 @@ export const User = () => {
   let { id } = useParams();
   const history = useHistory();
 
-  // recoil
-  const [recoilUser, setRecoilUser] = useRecoilState(userState);
-
   // apollo
   const userQuery = useQuery(USER, {
     skip: id === '-1',
@@ -277,28 +236,20 @@ export const User = () => {
 
   // react
   const emptyUser = {
-    size: '',
-    mobile: '',
     active: true,
     name: '',
-    workemail: '',
     phone: '',
-    work: '',
     address: '',
     username: '',
     email: '',
-    workphone: '',
     birthday: '0',
     roles: [],
-    password: 'test',
   };
   const [user, setUser] = useState(emptyUser);
   const [didChange, setDidChange] = useState(false);
   const [error, setError] = useState(false);
   const [errorMessage, setErrorMessage] = useState({});
   const [openDialog, setOpenDialog] = useState(false);
-  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     if (id !== '-1') setUser(userQuery.data?.user?.user);
@@ -307,18 +258,6 @@ export const User = () => {
   useEffect(() => {
     userQuery.refetch();
   }, []);
-
-  useEffect(() => {
-    if (recoilUser?.roles) {
-      recoilUser.roles.map(item => {
-        if (item.role === 'admin') setIsAdmin(true);
-        if (item.role === 'superadmin') {
-          setIsAdmin(true);
-          setIsSuperAdmin(true);
-        }
-      });
-    }
-  }, [recoilUser?.roles]);
 
   if (userQuery.loading) return <div>Henter Medlem...</div>;
 
@@ -334,7 +273,6 @@ export const User = () => {
    * @param {*} secondParam
    */
   const handleChange = (event, secondParam) => {
-    if (!isAdmin && !isSuperAdmin) return;
     let isError = false;
     let id = event?.target?.id;
     let value = event?.target?.value;
@@ -362,10 +300,10 @@ export const User = () => {
     }
 
     // active member switch
-    if (name === 'active') {
-      id = name;
-      value = checked;
-    }
+    // if (name === 'active') {
+    //   id = name;
+    //   value = checked;
+    // }
 
     const validated = validate(id, value);
 
@@ -383,15 +321,6 @@ export const User = () => {
       setDidChange(true);
     } else {
       setDidChange(false);
-    }
-
-    // updaing recoil state with new roles info
-    // for scenarios where roles "admin" and "superadmin" are changed
-    // which will have an effect on what to alter in user data
-    if (id === 'roles' && recoilUser.iqId === user.id) {
-      setRecoilUser(oldUser => {
-        return { ...oldUser, [id]: validated.value };
-      });
     }
 
     // insert new values in user object
@@ -426,16 +355,7 @@ export const User = () => {
                         address: user.address,
                         email: user.email,
                         phone: user.phone,
-                        mobile: user.mobile,
-                        work: user.work,
-                        workemail: user.workemail,
-                        workphone: user.workphone,
-                        size: user.size,
                         roles: user.roles.map(role => role.id),
-                        firebaseuid: user.firebaseuid ? user.firebaseuid : '',
-                        firebaseemail: user.firebaseemail
-                          ? user.firebaseemail
-                          : '',
                       },
                     })
                   : createUser({
@@ -450,13 +370,7 @@ export const User = () => {
                         address: user.address,
                         email: user.email,
                         phone: user.phone,
-                        mobile: user.mobile,
-                        work: user.work,
-                        workemail: user.workemail,
-                        workphone: user.workphone,
-                        size: user.size,
                         roles: user.roles.map(role => role.id),
-                        password: 'testing',
                       },
                     });
                 setErrorMessage({});
@@ -589,17 +503,6 @@ export const User = () => {
               helperText={errorMessage.email && errorMessage.email}
             />
             <TextField
-              id="workemail"
-              label="Arbejdsmail"
-              value={user.workemail}
-              error={!!errorMessage.workemail}
-              className={classes.textFieldLarger}
-              margin="dense"
-              onChange={handleChange}
-              variant="outlined"
-              helperText={errorMessage.workemail && errorMessage.workemail}
-            />
-            <TextField
               id="phone"
               label="Hjemmetelefon"
               value={user.phone}
@@ -609,39 +512,6 @@ export const User = () => {
               onChange={handleChange}
               variant="outlined"
               helperText={errorMessage.phone && errorMessage.phone}
-            />
-            <TextField
-              id="mobile"
-              label="Mobil"
-              value={user.mobile}
-              error={!!errorMessage.mobile}
-              className={classes.textField}
-              margin="dense"
-              onChange={handleChange}
-              variant="outlined"
-              helperText={errorMessage.mobile && errorMessage.mobile}
-            />
-            <TextField
-              id="workphone"
-              label="Arbejdstelefon"
-              value={user.workphone}
-              error={!!errorMessage.workphone}
-              className={classes.textField}
-              margin="dense"
-              onChange={handleChange}
-              variant="outlined"
-              helperText={errorMessage.workphone && errorMessage.workphone}
-            />
-            <TextField
-              id="work"
-              label="Arbejde"
-              value={user.work}
-              error={!!errorMessage.work}
-              className={classes.textField}
-              margin="dense"
-              onChange={handleChange}
-              variant="outlined"
-              helperText={errorMessage.work && errorMessage.work}
             />
             <MuiPickersUtilsProvider utils={DateFnsUtils}>
               <KeyboardDatePicker
@@ -668,22 +538,6 @@ export const User = () => {
               style={{ marginTop: 8 }}
               margin="dense"
             >
-              <InputLabel>T-Shirt størrelse</InputLabel>
-              <Select
-                name="size"
-                value={user.size}
-                onChange={handleChange}
-                label="Størrelse"
-              >
-                <MenuItem value="">
-                  <em>Ingen</em>
-                </MenuItem>
-                <MenuItem value={'M'}>M</MenuItem>
-                <MenuItem value={'L'}>L</MenuItem>
-                <MenuItem value={'XL'}>XL</MenuItem>
-                <MenuItem value={'XXL'}>XXL</MenuItem>
-                <MenuItem value={'XXXL'}>XXXL</MenuItem>
-              </Select>
             </FormControl>
             {rolesQuery?.data?.allRoles?.roles && (
               <Tooltip title="Tryk på tekst for at vælge ny titel. Slet gammel ved at trykke på kryds">

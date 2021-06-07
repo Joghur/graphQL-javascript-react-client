@@ -5,20 +5,16 @@ import {
   HttpLink,
   InMemoryCache,
 } from '@apollo/client';
-// import { useRecoilValue } from 'recoil';
 // eslint-disable-next-line import/named
 import { Routing } from './Routing';
-// import { SERVER_URL } from './constants';
-// import { tokenState } from './Recoil';
+import { GRAPHQL_SERVER_URL } from './constants';
 import packageJson from '../package.json';
 import { dateEpochToDateString } from './utils/dates';
 import withClearCache from './ClearCache';
 
 function MainApp() {
-  // const token = useRecoilValue(tokenState);
-
   const httpLink = new HttpLink({
-    uri: `localhost:4000/graphql`,
+    uri: GRAPHQL_SERVER_URL,
   });
 
   const authLink = new ApolloLink((operation, forward) => {
@@ -48,6 +44,7 @@ function MainApp() {
   );
 }
 
+// ClearCache makes sure that browser clears cache if build is newer than cached
 const ClearCacheComponent = withClearCache(MainApp);
 
 function App() {

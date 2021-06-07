@@ -4,9 +4,6 @@ import { useQuery } from '@apollo/client';
 import Table from '../../components/Tables';
 import { removeSpaces } from '../../utils/strings';
 import Snackbar from '../../components/Snackbar';
-import { auth } from '../../utils/firebase';
-import { tokenState } from '../../Recoil';
-import { useRecoilState } from 'recoil';
 
 const ALL_USERS = gql`
   query allUsers {
@@ -18,7 +15,6 @@ const ALL_USERS = gql`
         username
         email
         phone
-        mobile
         address
         roles {
           role
@@ -29,28 +25,20 @@ const ALL_USERS = gql`
 `;
 
 export const Users = () => {
-  // grapgQL
+  // graphQL
   const allUsers = useQuery(ALL_USERS, {
     fetchPolicy: 'cache-and-network',
   });
 
-  // recoil
-  const [token, setToken] = useRecoilState(tokenState);
+  console.log("allUsers", allUsers.data.allUsers)
 
   useEffect(() => {
     allUsers.refetch();
   }, []);
 
-  useEffect(async () => {
-    // refresh firebase token and update recoil value so apolloclient will use updated token
-    // when fetching from graphQL server
-    const token = await auth().currentUser.getIdToken();
-    setToken({ token });
-  }, []);
-
   const headCells = [
     { id: 'name', numeric: false, disablePadding: false, label: 'Navn' },
-    { id: 'username', numeric: false, disablePadding: false, label: 'IQ-navn' },
+    { id: 'username', numeric: false, disablePadding: false, label: 'Bruger navn' },
     { id: 'role', numeric: false, disablePadding: false, label: 'Rolle' },
     { id: 'address', numeric: false, disablePadding: false, label: 'Adresse' },
     { id: 'email', numeric: false, disablePadding: false, label: 'Email' },
@@ -58,7 +46,7 @@ export const Users = () => {
       id: 'phone',
       numeric: false,
       disablePadding: false,
-      label: 'Telefon (mobil først)',
+      label: 'Telefon',
     },
   ];
 

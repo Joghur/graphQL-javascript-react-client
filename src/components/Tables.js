@@ -17,8 +17,6 @@ import Paper from '@material-ui/core/Paper';
 import Checkbox from '@material-ui/core/Checkbox';
 import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
-// import DeleteIcon from '@material-ui/icons/Delete';
-import PictureAsPdf from '@material-ui/icons/PictureAsPdf';
 import FilterListIcon from '@material-ui/icons/FilterList';
 import AddBoxIcon from '@material-ui/icons/AddBox';
 import _ from 'lodash';
@@ -26,34 +24,6 @@ import styled from 'styled-components';
 import gql from 'graphql-tag';
 import Snackbar from '../components/Snackbar';
 import { useHistory } from 'react-router-dom';
-import html2PDF from 'jspdf-html2canvas';
-
-// getting pdf state and rows in tabel to make sure pdf is written
-// with amount of rows that has been chosen
-// const url = new URL(window.location.href);
-// const params = new URLSearchParams(url.search);
-// const pdfOnlyMode = params.get('pdfonly');
-// let pdfOnlyMode = false;
-// const rowspage = params.get('rowspage');
-
-const PDFBlock = styled.div`
-#pdf {
-  height: 1056px;
-  width: 816px;
-  background-color: white;
-}
-
-body {
-  background-color: gray;
-  padding: 0px;
-  margin: 0px;
-`;
-
-const PDF = gql`
-  query pdf {
-    pdf
-  }
-`;
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -171,50 +141,7 @@ const useToolbarStyles = makeStyles(theme => ({
 const EnhancedTableToolbar = props => {
   const history = useHistory();
   const classes = useToolbarStyles();
-  const { numSelected, title, handlePdfTag } = props;
-
-  const handleCreatePDF = () => {
-    console.log('handleCreatePDF');
-    handlePdfTag(true);
-    setTimeout(() => {
-      const input = document.getElementById('pdf');
-      html2PDF(input, {
-        jsPDF: {
-          format: 'a4',
-        },
-        margin: {
-          top: 0,
-          right: 4,
-          bottom: 0,
-          left: 4,
-        },
-        imageType: 'image/jpeg',
-        output: 'IQliste.pdf',
-      });
-
-      handlePdfTag(false);
-    }, 300);
-
-    // const token = localStorage.getItem('auth_token');
-    // const url = SERVER_URL + '/pdf';
-
-    // fetch(url, {
-    //   method: 'GET',
-    //   headers: {
-    //     authorization: token,
-    //   },
-    // })
-    //   .then(response => response.blob())
-    //   .then(blob => {
-    //     var url = window.URL.createObjectURL(blob);
-    //     var a = document.createElement('a');
-    //     a.href = url;
-    //     a.download = 'IQliste.pdf';
-    //     document.body.appendChild(a); // we need to append the element to the dom -> otherwise it will not work in firefox
-    //     a.click();
-    //     a.remove(); //afterwards we remove the element again
-    //   });
-  };
+  const { numSelected, title } = props;
 
   const handleNewUser = () => {
     console.log('handleNewUser');
@@ -256,11 +183,6 @@ const EnhancedTableToolbar = props => {
           <Tooltip title="Opret nyt Medlem">
             <IconButton aria-label="nyt medlem">
               <AddBoxIcon onClick={handleNewUser} />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Lav en PDF fil af listen">
-            <IconButton aria-label="create PDF">
-              <PictureAsPdf onClick={handleCreatePDF} />
             </IconButton>
           </Tooltip>
           <Tooltip title="Filtrér listen">
@@ -394,8 +316,7 @@ export default function Tables(props) {
 
   return (
     <div className={classes.root}>
-      <PDFBlock>
-        <div id={pdfOnlyMode ? 'pdf' : ''}>
+        <div>
           <Paper className={classes.paper}>
             <EnhancedTableToolbar
               title={title}
@@ -420,7 +341,6 @@ export default function Tables(props) {
                   rowCount={tabelArray.length}
                   headCells={headCells}
                   startRowsPerPage={startRowsPerPage}
-                  pdfOnlyMode={pdfOnlyMode}
                 />
                 <TableBody>
                   {stableSort(tabelArray, getComparator(order, orderBy))
@@ -518,7 +438,6 @@ export default function Tables(props) {
             )}
           </Paper>
         </div>
-      </PDFBlock>
     </div>
   );
 }
