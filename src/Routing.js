@@ -15,11 +15,9 @@ import { BrowserRouter as Router, NavLink, Route } from 'react-router-dom';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import PeopleIcon from '@material-ui/icons/People';
 import ListSubheader from '@material-ui/core/ListSubheader';
-import GavelIcon from '@material-ui/icons/Gavel';
 import Header from './components/Header';
 import { Users } from './screens/users/Users';
 import { User } from './screens/users/User';
-// import Snackbar from './components/Snackbar';
 
 const drawerWidth = 240;
 const usersMenuItems = [
@@ -140,7 +138,7 @@ export function Routing({ buildDate }) {
           <div className={classes.toolbar} />
           <div>
             <main>
-              <Route path="/users">
+              <Route exact path="/">
                 <Users />
               </Route>
               <Route path="/user/:id">

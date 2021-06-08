@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import gql from 'graphql-tag';
 import { useQuery } from '@apollo/client';
 import Table from '../../components/Tables';
@@ -6,6 +6,7 @@ import { removeSpaces } from '../../utils/strings';
 import Snackbar from '../../components/Snackbar';
 import { GRAPHQL_SERVER_URL } from '../../constants';
 import _ from 'lodash';
+import { useHistory } from 'react-router-dom';
 
 const ALL_USERS = gql`
   query allUsers {
@@ -39,17 +40,25 @@ const ALL_ROLES = gql`
 `;
 
 export const Users = () => {
+  // react-router
+  const history = useHistory();
+
   // graphQL
   const allUsers = useQuery(ALL_USERS, {
-    fetchPolicy: 'cache-and-network',
+    fetchPolicy: 'network-only',
   });
   const allRoles = useQuery(ALL_ROLES, {
-    fetchPolicy: 'cache-and-network',
+    fetchPolicy: 'network-only',
   });
 
   useEffect(() => {
-    allUsers.refetch();
-    allRoles.refetch();
+    // listener that makes sure page rerenders when Gobackbutton is pressed
+    history.listen((location, action) => {
+      if (location.pathname === '/') {
+        allUsers.refetch();
+        allRoles.refetch();
+      }
+    });
   }, []);
 
   const headCells = [
@@ -150,6 +159,7 @@ export const Users = () => {
               21,
               { value: tabelArray.length, label: 'Alle' },
             ]}
+            forceRerender={[allUsers.refetch, allRoles.refetch]}
           />
         </>
       )}
